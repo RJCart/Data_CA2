@@ -1808,24 +1808,10 @@ library(knitr)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG48IS0tIHJuYi1zb3VyY2UtYmVnaW4gZXlKa1lYUmhJam9pWUdCZ2MzRnNYRzV4ZFdWeWVTQThMU0JjSWx4dVUwVk1SVU5VSUZ4dUlDQWdJR052ZFc1MGNua3NYRzRnSUNBZ1EwOVZUbFFvS2lrZ1FWTWdjSEp2YW1WamRGOWpiM1Z1ZEN4Y2JpQWdJQ0JUVlUwb1luVmtaMlYwS1NCQlV5QjBiM1JoYkY5aWRXUm5aWFJjYmtaU1QwMGdYRzRnSUNBZ2NISnZhbVZqZEhOY2JrZFNUMVZRSUVKWklGeHVJQ0FnSUdOdmRXNTBjbmxjYms5U1JFVlNJRUpaSUZ4dUlDQWdJSFJ2ZEdGc1gySjFaR2RsZENCRVJWTkRPMXdpWEc1Y2JuSmxjM1ZzZENBOExTQmtZa2RsZEZGMVpYSjVLR052Yml3Z2NYVmxjbmtwWEc1d2NtbHVkQ2h5WlhOMWJIUXBYRzVjYm1CZ1lDSjkgLS0+XG5cbmBgYHNxbFxucXVlcnkgPC0gXCJcblNFTEVDVCBcbiAgICBjb3VudHJ5LFxuICAgIENPVU5UKCopIEFTIHByb2plY3RfY291bnQsXG4gICAgU1VNKGJ1ZGdldCkgQVMgdG90YWxfYnVkZ2V0XG5GUk9NIFxuICAgIHByb2plY3RzXG5HUk9VUCBCWSBcbiAgICBjb3VudHJ5XG5PUkRFUiBCWSBcbiAgICB0b3RhbF9idWRnZXQgREVTQztcIlxuXG5yZXN1bHQgPC0gZGJHZXRRdWVyeShjb24sIHF1ZXJ5KVxucHJpbnQocmVzdWx0KVxuXG5gYGBcblxuPCEtLSBybmItc291cmNlLWVuZCAtLT5cbiJ9 -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgc3FsXG5xdWVyeSA8LSBcIlxuU0VMRUNUIFxuICAgIGNvdW50cnksXG4gICAgQ09VTlQoKikgQVMgcHJvamVjdF9jb3VudCxcbiAgICBTVU0oYnVkZ2V0KSBBUyB0b3RhbF9idWRnZXRcbkZST00gXG4gICAgcHJvamVjdHNcbkdST1VQIEJZIFxuICAgIGNvdW50cnlcbk9SREVSIEJZIFxuICAgIHRvdGFsX2J1ZGdldCBERVNDO1wiXG5cbnJlc3VsdCA8LSBkYkdldFF1ZXJ5KGNvbiwgcXVlcnkpXG5wcmludChyZXN1bHQpXG5cbmBgYCJ9 -->
-<pre class="sql"><code>query &lt;- &quot;
-SELECT 
-    country,
-    COUNT(*) AS project_count,
-    SUM(budget) AS total_budget
-FROM 
-    projects
-GROUP BY 
-    country
-ORDER BY 
-    total_budget DESC;&quot;
-
-result &lt;- dbGetQuery(con, query)
-print(result)
-</code></pre>
-<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gZ2V0KG9wdGlvbnMkY29ubmVjdGlvbiwgZW52aXIgPSBnbG9iYWxlbnYoKSkgOiBcbiAgaW52YWxpZCBmaXJzdCBhcmd1bWVudFxuRmFpbGVkIHRvIGV4ZWN1dGUgU1FMIGNodW5rXG4ifQ== -->
+<pre><code>Error in get(options$connection, envir = globalenv()) : 
+  invalid first argument
+Failed to execute SQL chunk</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->

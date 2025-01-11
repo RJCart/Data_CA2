@@ -1,0 +1,48 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# Packages
+required_packages <- c("DBI", "RSQLite", "odbc", "knitr")
+
+# Install Missing Packages
+for (pkg in required_packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg)
+    library(pkg, character.only = TRUE)
+  }
+}
+
+# Load Packages
+library(DBI)
+library(RSQLite)
+library(odbc)
+library(knitr)
+```
+
+
+```{r}
+db_path <- "C:/Users/Ruth/Desktop/Ca1_RuthC/Data_CA2/ICA_2023.sqlite"
+```
+
+
+```{sql connection=}
+query <- "
+SELECT 
+    country,
+    COUNT(*) AS project_count,
+    SUM(budget) AS total_budget
+FROM 
+    projects
+GROUP BY 
+    country
+ORDER BY 
+    total_budget DESC;"
+
+result <- dbGetQuery(con, query)
+print(result)
+
+```
+

@@ -9,7 +9,7 @@ editor: visual
 
 ```{r}
 #install.packages("broom")
-
+install.packages("reshape2")
 ```
 
 ```{r}
@@ -22,6 +22,7 @@ library(odbc)
 library(knitr)
 library(ggplot2)
 library(broom)
+library(reshape2)
 
 ```
 
@@ -285,3 +286,26 @@ The P value for budget is \<.05 The Pvalue for team size is \<.05
 We can determine that a higher team size and budget predicts a greater success rate.
 
 3.  Reliability
+
+```{r}
+# Count missing values in each column
+colSums(is.na(data))
+
+# Percentage of missing values per column
+colMeans(is.na(data)) * 100
+```
+
+```{r}
+summary(data)
+```
+
+```{}
+```
+
+Created a Correlation Matrix which seems to suggest the data is reliable.
+
+```{r}
+cor_matrix <- cor(data[, c("Budget", "team_size", "success_rate")], use = "complete.obs")
+print(cor_matrix)
+
+```

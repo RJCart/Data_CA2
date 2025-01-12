@@ -1,11 +1,20 @@
 ---
 title: "Ca2"
 author: "Ruth C"
-format: dashboard
+format:
+  dashboard:
+    orientation: rows
+    code-fold: false # Disable code folding
+    code-line-numbers: false # Remove line numbers
+    code-styles: false # Use plain code without specific styles
 editor: visual
+exectute:
+  echo: false
 ---
 
-## Part A: SQL
+{.tabset}
+
+# Part A: SQL
 
 ```{r}
 #install.packages("broom")
@@ -16,6 +25,7 @@ editor: visual
 #install.packages("knitr")
 #install.packages("ggplot2")
 #install.packages("shiny")
+#install.packages("ggmap")
 ```
 
 ```{r}
@@ -29,7 +39,7 @@ library(knitr)
 library(ggplot2)
 library(broom)
 library(reshape2)
-
+library(ggmap)
 ```
 
 ```{r}
@@ -56,9 +66,10 @@ print(tables)
 con <- dbConnect(SQLite(), dbname = "ICA_2023.sqlite")
 ```
 
-1.  The Budget and number of Projects for each Country.
+The Budget and number of Projects for each Country.
 
 ```{sql connection=con}
+
 SELECT 
     c.CustomerCountry AS country,
     SUM(p.budget) AS total_budget,
@@ -75,7 +86,7 @@ ORDER BY
     total_budget DESC;
 ```
 
-2.  Average Development time for each project.
+Average Development time for each project.
 
 ```{sql connection=con}
 --Project Duration
@@ -139,7 +150,7 @@ ORDER BY
     project_durations.project_duration DESC;
 ```
 
-3.  Top Three Developers (DeveloperID) based on successful projects. The successful projects are those which were completed on or before the expected completion date.
+Top Three Developers (DeveloperID) based on successful projects. The successful projects are those which were completed on or before the expected completion date.
 
 ```{sql connection=con}
 
@@ -162,9 +173,9 @@ ORDER BY
 LIMIT 3;
 ```
 
-## Part A: SQL concepts demo.
+Part A: SQL concepts demo.
 
-1.  Select with Like and Or.
+Select with Like and Or.
 
     Listing textures and animations and their creation date.
 
@@ -181,7 +192,7 @@ WHERE
     Type LIKE '%Animation%' OR Type LIKE '%Texture%';
 ```
 
-2.  Select with DISTINCT AND ORDER BY
+Select with DISTINCT AND ORDER BY
 
     Showing AssetIDs ordered by their creation dates.
 
@@ -197,7 +208,7 @@ ORDER BY
     CreationDate ASC;
 ```
 
-3.  Subquery with SELECT
+Subquery with SELECT
 
     Finding the number of developers who have five or more years experience and categorising them as experienced_developers.
 
@@ -222,12 +233,13 @@ WHERE
 
 ```
 
-## Part B: Linear Regression
+# Part B: Linear Regression
 
-1.  Model
+Model
 
-```{r}
+```{r Success Rate vs Budget and Team Size}
 
+#| title: Success Rate Vs Budget and Team Size
 # access success rate data
 con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
 data <- dbGetQuery(con, "
@@ -276,7 +288,7 @@ ggplot(data, aes(x = Budget, y = success_rate, color = team_size)) +
   theme_minimal()
 ```
 
-2.  Interpret.
+Interpret.
 
 Used Broom Package to create a table which shows how the predictors effect the dependent variable.
 
@@ -291,15 +303,15 @@ The P value for budget is \<.05 The Pvalue for team size is \<.05
 
 We can determine that a higher team size and budget predicts a greater success rate.
 
-3.  Reliability
 
 
+Reliability
 
 ```{r}
 summary(data)
 ```
 
-```{}
+```         
 ```
 
 Created a Correlation Matrix which seems to suggest the data is reliable.

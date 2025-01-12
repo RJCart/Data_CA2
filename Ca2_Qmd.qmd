@@ -62,3 +62,155 @@ GROUP BY
 ORDER BY 
     total_budget DESC;
 ```
+
+```{sql connection=con}
+--Project Duration
+
+
+SELECT 
+    a.ProjectID,
+    julianday(ActualCompletionDate) - julianday(CreationDate) AS project_duration_days
+FROM 
+    Assets a
+JOIN 
+    Timelines t
+ON 
+    a.ProjectID = t.ProjectID
+WHERE 
+    CreationDate IS NOT NULL 
+    AND ActualCompletionDate IS NOT NULL;
+```
+
+```{sql connection=con}
+
+--Project Duration categorised by No. of assets used
+
+SELECT 
+    asset_count.ProjectID,
+    asset_count.num_assets AS number_of_assets,
+    project_durations.project_duration AS project_duration_days
+FROM 
+    (
+        -- Number of assets 
+        SELECT 
+            ProjectID, 
+            COUNT(AssetID) AS num_assets
+        FROM 
+            Assets
+        GROUP BY 
+            ProjectID
+    ) AS asset_count
+JOIN 
+    (
+        -- Duration 
+        SELECT 
+            a.ProjectID,
+            julianday(t.ActualCompletionDate) - julianday(MIN(a.CreationDate)) AS project_duration
+        FROM 
+            Assets a
+        JOIN 
+            Timelines t
+        ON 
+            a.ProjectID = t.ProjectID
+        WHERE 
+            a.CreationDate IS NOT NULL AND t.ActualCompletionDate IS NOT NULL
+        GROUP BY 
+            a.ProjectID
+    ) AS project_durations
+ON 
+    asset_count.ProjectID = project_durations.ProjectID
+ORDER BY 
+    project_durations.project_duration DESC;
+```
+
+```{sql connection=con}
+--
+
+SELECT 
+    a.ProjectID,
+    julianday(t.ActualCompletionDate) - julianday(MIN(a.CreationDate)) AS project_duration_days,
+    COUNT(a.AssetID) AS number_of_assets
+FROM 
+    Assets a
+JOIN 
+    Timelines t
+ON 
+    a.ProjectID = t.ProjectID
+WHERE 
+    a.CreationDate IS NOT NULL 
+    AND t.ActualCompletionDate IS NOT NULL
+GROUP BY 
+    a.ProjectID
+ORDER BY
+```
+
+
+```{sql connection=con}
+number_of_assets DESC;
+```
+
+```{sql connection=con}
+
+-- Most Successful Developers
+SELECT 
+    pd.DeveloperID,
+    COUNT(DISTINCT pd.ProjectID) AS successful_projects_count
+FROM 
+    ProjectDevelopers pd
+JOIN 
+    Timelines t
+ON 
+    pd.ProjectID = t.ProjectID
+WHERE 
+    julianday(t.ActualCompletionDate) <= julianday(t.ExpectedCompletionDate)
+GROUP BY 
+    pd.DeveloperID
+ORDER BY 
+    successful_projects_count DESC
+LIMIT 3;
+```
+```{sql connection=con}
+--Selecting information about the creation date of animations and textures with Like and Or 
+
+SELECT 
+    Type, 
+    CreationDate
+FROM 
+    Assets
+WHERE 
+    Type LIKE '%Animation%' OR Type LIKE '%Texture%';
+```
+```{sql connection=con}
+
+-- Order AssetIDs by their creation date using Distinct and Order by
+SELECT 
+    DISTINCT AssetID
+FROM 
+    Assets
+ORDER BY 
+    CreationDate ASC;
+```
+```{sql connection=con}
+--Find experienced developers on team
+
+SELECT 
+    COUNT(*) AS experienced_developers
+FROM 
+    Developers
+WHERE 
+    Name IN (
+        SELECT 
+            Name
+        FROM 
+            Developers
+        WHERE 
+            ExperienceYears > 5
+    );
+
+
+```
+```{sql connection=con}
+PRAGMA table_info(Developers);
+
+```
+

@@ -1,7 +1,7 @@
 ---
 title: "Ca2"
 author: "Ruth C"
-format: html
+format: dashboard
 editor: visual
 ---
 
@@ -15,7 +15,7 @@ editor: visual
 #install.packages("odbc")
 #install.packages("knitr")
 #install.packages("ggplot2")
-
+#install.packages("shiny")
 ```
 
 ```{r}
@@ -293,13 +293,7 @@ We can determine that a higher team size and budget predicts a greater success r
 
 3.  Reliability
 
-```{r}
-# Count missing values in each column
-colSums(is.na(data))
 
-# Percentage of missing values per column
-colMeans(is.na(data)) * 100
-```
 
 ```{r}
 summary(data)

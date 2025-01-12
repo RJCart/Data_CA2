@@ -5,14 +5,12 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## Part A: SQL
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 ```{r}
-install.packages("broom")
+#install.packages("broom")
 
 ```
-
 
 ```{r}
 
@@ -34,8 +32,7 @@ con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
 
 ```
 
-```         
-```
+List Of Tables
 
 ```{r}
 
@@ -51,6 +48,8 @@ print(tables)
 
 con <- dbConnect(SQLite(), dbname = "ICA_2023.sqlite")
 ```
+
+1.  The Budget and number of Projects for each Country.
 
 ```{sql connection=con}
 SELECT 
@@ -69,6 +68,8 @@ ORDER BY
     total_budget DESC;
 ```
 
+2.  Average Development time for each project.
+
 ```{sql connection=con}
 --Project Duration
 
@@ -86,6 +87,8 @@ WHERE
     CreationDate IS NOT NULL 
     AND ActualCompletionDate IS NOT NULL;
 ```
+
+Added number of assets for each project for interest.
 
 ```{sql connection=con}
 
@@ -129,31 +132,7 @@ ORDER BY
     project_durations.project_duration DESC;
 ```
 
-```{sql connection=con}
---
-
-SELECT 
-    a.ProjectID,
-    julianday(t.ActualCompletionDate) - julianday(MIN(a.CreationDate)) AS project_duration_days,
-    COUNT(a.AssetID) AS number_of_assets
-FROM 
-    Assets a
-JOIN 
-    Timelines t
-ON 
-    a.ProjectID = t.ProjectID
-WHERE 
-    a.CreationDate IS NOT NULL 
-    AND t.ActualCompletionDate IS NOT NULL
-GROUP BY 
-    a.ProjectID
-ORDER BY
-```
-
-
-```{sql connection=con}
-number_of_assets DESC;
-```
+3.  Top Three Developers (DeveloperID) based on successful projects. The successful projects are those which were completed on or before the expected completion date.
 
 ```{sql connection=con}
 
@@ -175,6 +154,13 @@ ORDER BY
     successful_projects_count DESC
 LIMIT 3;
 ```
+
+## Part A: SQL concepts demo.
+
+1.  Select with Like and Or.
+
+    Listing textures and animations and their creation date.
+
 ```{sql connection=con}
 --Selecting information about the creation date of animations and textures with Like and Or 
 
@@ -187,6 +173,11 @@ FROM
 WHERE 
     Type LIKE '%Animation%' OR Type LIKE '%Texture%';
 ```
+
+2.  Select with DISTINCT AND ORDER BY
+
+    Showing AssetIDs ordered by their creation dates.
+
 ```{sql connection=con}
 
 -- Order AssetIDs by their creation date using Distinct and Order by
@@ -198,7 +189,13 @@ FROM
 ORDER BY 
     CreationDate ASC;
 ```
+
+3.  Subquery with SELECT
+
+    Finding the number of developers who have five or more years experience and categorising them as experienced_developers.
+
 ```{sql connection=con}
+
 --Find experienced developers on team
 
 SELECT 
@@ -217,58 +214,12 @@ WHERE
 
 
 ```
-```{sql connection=con}
 
--- Projects are deemed successful if the actual completion date falls on or before the expected completion date.
-SELECT 
-    p.ProjectName,
-    p.Budget,
-    COUNT(ad.DeveloperID) AS team_size,
-    CASE 
-        WHEN julianday(t.ActualCompletionDate) <= julianday(t.ExpectedCompletionDate) THEN 'Yes'
-        ELSE 'No'
-    END AS successful
-FROM 
-    Projects p
-LEFT JOIN 
-    Assets a
-ON 
-    p.ProjectID = a.ProjectID
-LEFT JOIN 
-    AssetsDevelopers ad
-ON 
-    a.AssetID = ad.AssetID
-LEFT JOIN 
-    Timelines t
-ON 
-    p.ProjectID = t.ProjectID
-GROUP BY 
-    p.ProjectName, p.Budget, successful
-ORDER BY 
-    p.ProjectName;
-```
-```{sql connection=con}
-SELECT 
-    ProjectID,
-    COUNT(CASE 
-             WHEN julianday(ActualCompletionDate) <= julianday(ExpectedCompletionDate) THEN 1 
-         END) AS SuccessfulProjects,
-    COUNT(*) AS TotalProjects,
-    ROUND(
-        (CAST(COUNT(CASE 
-                       WHEN julianday(ActualCompletionDate) <= julianday(ExpectedCompletionDate) THEN 1 
-                   END) AS FLOAT) 
-        / COUNT(*)) * 100, 2
-    ) AS SuccessRatePercentage
-FROM 
-    Timelines
-GROUP BY 
-    ProjectID;
-```
+## Part B: Linear Regression
+
+1.  Model
+
 ```{r}
-
-library(ggplot2)
-library(DBI)
 
 # access success rate data
 con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
@@ -299,13 +250,10 @@ GROUP BY
     p.ProjectID, p.ProjectName, p.Budget;
 ")
 
-# Close the database connection
 dbDisconnect(con)
 
 # Linerar Model
 model <- lm(success_rate ~ Budget + team_size, data = data)
-
-# Show summary
 summary(model)
 
 # Results Plot
@@ -320,15 +268,20 @@ ggplot(data, aes(x = Budget, y = success_rate, color = team_size)) +
   ) +
   theme_minimal()
 ```
+
+2.  Interpret.
+
+Used Broom Package to create a table which shows how the predictors effect the dependent variable.
+
 ```{r}
 tidy_table <- tidy(model)
 print(tidy_table)
 ```
-For the Budget, a higher budget predicts a slightly higher success rate.
-For the team size, a higher team size predicts a higher success rate.
 
-The P value for budget is <.05
-The Pvalue for team size is <.05
+For the Budget, a higher budget predicts a slightly higher success rate. For the team size, a higher team size predicts a higher success rate.
+
+The P value for budget is \<.05 The Pvalue for team size is \<.05
 
 We can determine that a higher team size and budget predicts a greater success rate.
 
+3.  Reliability

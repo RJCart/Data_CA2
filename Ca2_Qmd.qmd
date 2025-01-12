@@ -175,6 +175,7 @@ LIMIT 3;
 SELECT 
     Type, 
     CreationDate
+    
 FROM 
     Assets
 WHERE 
@@ -184,7 +185,8 @@ WHERE
 
 -- Order AssetIDs by their creation date using Distinct and Order by
 SELECT 
-    DISTINCT AssetID
+    DISTINCT AssetID,
+    CreationDate
 FROM 
     Assets
 ORDER BY 
@@ -210,7 +212,25 @@ WHERE
 
 ```
 ```{sql connection=con}
-PRAGMA table_info(Developers);
 
+
+SELECT 
+    p.ProjectName,
+    COUNT(ad.DeveloperID) AS team_size
+FROM 
+    Projects p
+JOIN 
+    Assets a
+ON 
+    p.ProjectID = a.ProjectID
+JOIN 
+    AssetsDevelopers ad
+ON 
+    a.AssetID = ad.AssetID
+GROUP BY 
+    p.ProjectName
+ORDER BY 
+    team_size DESC;
 ```
+
 

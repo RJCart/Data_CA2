@@ -8,6 +8,11 @@ editor: visual
 ## Quarto
 
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+```{r}
+install.packages("broom")
+
+```
+
 
 ```{r}
 
@@ -18,6 +23,7 @@ library(RSQLite)
 library(odbc)
 library(knitr)
 library(ggplot2)
+library(broom)
 
 ```
 
@@ -213,24 +219,116 @@ WHERE
 ```
 ```{sql connection=con}
 
-
+-- Projects are deemed successful if the actual completion date falls on or before the expected completion date.
 SELECT 
     p.ProjectName,
-    COUNT(ad.DeveloperID) AS team_size
+    p.Budget,
+    COUNT(ad.DeveloperID) AS team_size,
+    CASE 
+        WHEN julianday(t.ActualCompletionDate) <= julianday(t.ExpectedCompletionDate) THEN 'Yes'
+        ELSE 'No'
+    END AS successful
 FROM 
     Projects p
-JOIN 
+LEFT JOIN 
     Assets a
 ON 
     p.ProjectID = a.ProjectID
-JOIN 
+LEFT JOIN 
     AssetsDevelopers ad
 ON 
     a.AssetID = ad.AssetID
+LEFT JOIN 
+    Timelines t
+ON 
+    p.ProjectID = t.ProjectID
 GROUP BY 
-    p.ProjectName
+    p.ProjectName, p.Budget, successful
 ORDER BY 
-    team_size DESC;
+    p.ProjectName;
 ```
+```{sql connection=con}
+SELECT 
+    ProjectID,
+    COUNT(CASE 
+             WHEN julianday(ActualCompletionDate) <= julianday(ExpectedCompletionDate) THEN 1 
+         END) AS SuccessfulProjects,
+    COUNT(*) AS TotalProjects,
+    ROUND(
+        (CAST(COUNT(CASE 
+                       WHEN julianday(ActualCompletionDate) <= julianday(ExpectedCompletionDate) THEN 1 
+                   END) AS FLOAT) 
+        / COUNT(*)) * 100, 2
+    ) AS SuccessRatePercentage
+FROM 
+    Timelines
+GROUP BY 
+    ProjectID;
+```
+```{r}
 
+library(ggplot2)
+library(DBI)
+
+# access success rate data
+con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
+data <- dbGetQuery(con, "
+SELECT 
+    p.ProjectID,
+    p.ProjectName,
+    p.Budget,
+    COUNT(ad.DeveloperID) AS team_size,
+    (COUNT(CASE 
+             WHEN julianday(t.ActualCompletionDate) <= julianday(t.ExpectedCompletionDate) THEN 1 
+         END) * 100.0 / COUNT(*)) AS success_rate
+FROM 
+    Projects p
+LEFT JOIN 
+    Assets a
+ON 
+    p.ProjectID = a.ProjectID
+LEFT JOIN 
+    AssetsDevelopers ad
+ON 
+    a.AssetID = ad.AssetID
+LEFT JOIN 
+    Timelines t
+ON 
+    p.ProjectID = t.ProjectID
+GROUP BY 
+    p.ProjectID, p.ProjectName, p.Budget;
+")
+
+# Close the database connection
+dbDisconnect(con)
+
+# Linerar Model
+model <- lm(success_rate ~ Budget + team_size, data = data)
+
+# Show summary
+summary(model)
+
+# Results Plot
+ggplot(data, aes(x = Budget, y = success_rate, color = team_size)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "blue") +
+  labs(
+    title = "Linear Regression: Success Rate vs Budget and Team Size",
+    x = "Budget (in dollars)",
+    y = "Success Rate (%)",
+    color = "Team Size"
+  ) +
+  theme_minimal()
+```
+```{r}
+tidy_table <- tidy(model)
+print(tidy_table)
+```
+For the Budget, a higher budget predicts a slightly higher success rate.
+For the team size, a higher team size predicts a higher success rate.
+
+The P value for budget is <.05
+The Pvalue for team size is <.05
+
+We can determine that a higher team size and budget predicts a greater success rate.
 

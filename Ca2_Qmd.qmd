@@ -9,21 +9,8 @@ editor: visual
 
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-# Packages
-required_packages <- c("DBI", "RSQLite", "odbc", "knitr")
 
-# Install Missing Packages
-for (pkg in required_packages) {
-  if (!require(pkg, character.only = TRUE)) {
-    install.packages(pkg)
-    library(pkg, character.only = TRUE)
-  }
-}
 
 #Packages
 library(DBI)
@@ -35,102 +22,43 @@ library(ggplot2)
 ```
 
 ```{r}
-
-```
-
-```{r}
 #data
 db_path <- "C:/Users/Ruth/Desktop/Ca1_RuthC/Data_CA2/ICA_2023.sqlite"
 con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
 
 ```
 
-```{}
+```         
+```
+
+```{r}
+
+#List names of tables
+
+con <- dbConnect(SQLite(), dbname = "C:/Users/Ruth/Desktop/Ca1_RuthC/Data_CA2/ICA_2023.sqlite")
+
+# List tables
+tables <- dbListTables(con)
+
+# Print their names
+print(tables)
+
+con <- dbConnect(SQLite(), dbname = "ICA_2023.sqlite")
 ```
 
 ```{sql connection=con}
 SELECT 
-    success_rate, 
-    budget, 
-    team_size
+    c.CustomerCountry AS country,
+    SUM(p.budget) AS total_budget,
+    COUNT(p.ProjectID) AS project_count
 FROM 
-    Projects
-WHERE 
-    success_rate IS NOT NULL 
-    AND budget IS NOT NULL 
-    AND team_size IS NOT NULL;
-```
-
-```{r}
-# SQL query results
-data <- dbGetQuery(con, "
-SELECT 
-    success_rate, 
-    budget, 
-    team_size
-FROM 
-    Projects
-WHERE 
-    success_rate IS NOT NULL 
-    AND budget IS NOT NULL 
-    AND team_size IS NOT NULL;
-")
-
-# Perform linear regression
-model <- lm(success_rate ~ budget + team_size, data = data)
-summary(model)
-```
-
-```{r}
-# Plot success rate vs budget and team size
-library(ggplot2)
-
-ggplot(data, aes(x = budget, y = success_rate, color = team_size)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(group = 1), color = "blue") +
-  labs(
-    title = "Project Success Rate vs. Budget and Team Size",
-    x = "Budget",
-    y = "Success Rate",
-    color = "Team Size"
-  ) +
-  theme_minimal()
-```
-
-```{r}
-# Visualize the relationship between success_rate, budget, and team_size
-ggplot(data, aes(x = budget, y = success_rate, color = team_size)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, aes(group = 1), color = "blue") +
-  labs(
-    title = "Project Success Rate vs. Budget and Team Size",
-    x = "Budget",
-    y = "Success Rate",
-    color = "Team Size"
-  ) +
-  theme_minimal()
-
-```
-
-```{r}
-library(DBI)
-library(RSQLite)
-
-con <- dbConnect(RSQLite::SQLite(), dbname = "ICA_2023.sqlite")
-
-# Run query
-data <- dbGetQuery(con, "
-SELECT 
-    success_rate, 
-    budget, 
-    team_size
-FROM 
-    Projects
-WHERE 
-    success_rate IS NOT NULL 
-    AND budget IS NOT NULL 
-    AND team_size IS NOT NULL;
-")
-
-dbDisconnect(con)
+    Customers c
+JOIN 
+    Projects p
+ON 
+    c.CustomerID = p.CustomerID
+GROUP BY 
+    c.CustomerCountry
+ORDER BY 
+    total_budget DESC;
 ```

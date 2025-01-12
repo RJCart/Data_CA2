@@ -9,7 +9,13 @@ editor: visual
 
 ```{r}
 #install.packages("broom")
-install.packages("reshape2")
+#install.packages("reshape2")
+#install.packages("DBI")
+#install.packages("RSQLite")
+#install.packages("odbc")
+#install.packages("knitr")
+#install.packages("ggplot2")
+
 ```
 
 ```{r}
